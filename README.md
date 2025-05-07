@@ -2,4 +2,4 @@
 
 A collection of technical stuff that might be useful to others or not. 
 
-The contents could be code, meta-data, FYIs, did you knows, this is nuts or anything technical that may pique the interest or not.
+The contents could consist of WTF's, code, meta-data, FYIs, Did You Know's, OMG This is Nuts, or anything technical that may pique the interest or not.
