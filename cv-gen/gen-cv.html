@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CV with Timeline, Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Timeline link base and active styles with animation */
+        .timeline-link {
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid transparent;
+            padding-left: 0.5rem;
+            display: inline-block;
+        }
+
+        .timeline-link.active {
+            font-weight: 700;
+            color: #1e40af;
+            /* Tailwind blue-800 */
+            background-color: #bfdbfe;
+            /* Tailwind blue-200 */
+            border-left-color: #1e40af;
+            transform: scale(1.05);
+            box-shadow: 0 0 8px 2px rgba(59, 130, 246, 0.6);
+            /* blue glow */
+            border-radius: 4px;
+        }
+
+        .work.glow {
+            box-shadow: 0 0 15px 5px gold;
+            transition: box-shadow 0.5s ease-in-out;
+        }
+
+        .work.highlight {
+            border: 2px solid #3b82f6;
+            /* Tailwind blue-500 */
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            /* Glow effect */
+            border-radius: 0.5rem;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 0px rgba(34, 80, 197, 0.496);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(34, 80, 197, 0.8);
+            }
+
+            100% {
+                box-shadow: 0 0 0px rgba(34, 80, 197, 0.5);
+            }
+        }
+
+        .glow {
+            animation: glow 1.5s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans">
+
+    <div id="loading" class="fixed inset-0 flex flex-col items-center justify-center bg-white z-50">
+        <!-- Loading Spinner -->
+        <div role="status" class="mb-4">
+            <svg aria-hidden="true" class="w-16 h-16 text-gray-200 animate-spin fill-blue-600" viewBox="0 0 100 101"
+                fill="none">
+                <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="10"></circle>
+                <path d="M50 5a45 45 0 1 1-45 45" fill="currentFill"></path>
+            </svg>
+            <span class="sr-only">Loading...</span>
+        </div>
+        <!-- Branding / Text -->
+        <h1 class="text-2xl font-bold text-gray-700">Loading CV - hang on in there, I've been busy...</h1>
+    </div>
+
+    <!-- the content -->
+    <div class="flex max-w-6xl mx-auto p-4 pb-20">
+        <!-- Left Panel with timelines -->
+        <div class="w-1/3 pr-4 sticky top-4">
+            <!-- Search Bar -->
+            <div class="mb-6">
+                <input type="text" id="searchInput" placeholder="Search..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    oninput="filterWork()" />
+                <button onclick="clearSearch()"
+                    class="mt-2 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded">
+                    Clear Search
+                </button>
+            </div>
+
+            <!-- the timelines -->
+            <div id="timeline" class="flex flex-col space-y-4">
+
+            </div>
+        </div>
+
+        <!-- Right Panel displaying the work items -->
+        <div class="w-2/3 space-y-8 overflow-auto max-h-[90vh]" id="work-container">
+            <!-- Work Items will go here -->
+
+            <!-- No Results Message -->
+            <div id="noResults" class="hidden text-center text-red-600 font-semibold">
+                No results found.
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed bottom-0 left-0 w-full bg-gray-800 text-white text-center p-3 shadow-lg">
+        <span class="text-sm">
+            📧 <a href="mailto:you@example.com" class="underline hover:text-blue-300">Send me an
+                email</a>
+        </span>
+        <span class="text-sm">
+            🔗 <a href="https://www.linkedin.com/in/you/" target="_blank" rel="noopener"
+                class="underline hover:text-blue-300">
+                <i hrf class="fab fa-linkedin text-blue-400"></i> LinkedIn
+            </a>
+        </span>
+    </footer>
+
+    <script>
+        async function loadWorkItems() {
+            const json = 'https://some-data-load';
+            
+            const response = await fetch(json);
+
+            document.getElementById('loading').style.display = 'none';
+
+            const workItems = await response.json();
+
+            const timeline = document.getElementById('timeline');
+            if (!timeline) {
+                console.warn('No #timeline container found in the DOM');
+                return;
+            }
+
+            const container = document.getElementById('work-container');
+
+            workItems.forEach((item, index) => {
+                const company = item.Company || `Company ${index + 1}`; // fallback name
+
+                const id = `${item.Id}`;
+
+                // Add to timeline
+                const timelineItem = document.createElement('a');
+
+                timelineItem.id = index;
+                timelineItem.href = `#${id}`;
+                timelineItem.className = "timeline-link text-blue-600 hover:underline";
+                timelineItem.dataset.company = id;
+                timelineItem.dataset.target = id,
+
+                    timelineItem.innerText = `${item.Company} (${item.TimeLineDates}) | ${item.Type}`;
+
+                timeline.appendChild(timelineItem);
+
+                // Add work card
+                const div = document.createElement('div');
+                div.id = id;
+                div.dataset.company = id;
+                div.dataset.tags = item.Tags;
+                div.className = "bg-white p-6 rounded-lg shadow work";
+
+                div.innerHTML = `
+        <h3 class="text-xl font-bold mb-1">${item.Role}</h3>
+        <p class="text-gray-500 mb-2">${item.Company} | ${item.WorkItemDates} | ${item.Type} | ${item.Duration}</p>
+              
+        ${item.Description.split("|").map(desc => `<p class="mb-4">${desc}</p>`).join('')}
+        
+        <div class="tags mt-4 flex flex-wrap gap-2">
+          ${item.Tags.split(',').map(tag => `<span class="tag cursor-pointer inline-block bg-blue-100 text-blue-800 text-sm font-medium px-2 py-1 rounded-full">${tag.trim()}</span>`).join('')}
+        </div>
+      `;
+                container.appendChild(div);
+
+            });
+        }
+
+
+        async function updateTimeLinks() {
+
+            document.querySelectorAll(".timeline-link").forEach((item) => {
+
+                item.addEventListener("click", function (e) {
+                    const targetId = this.getAttribute("data-target");
+                    const targetElement = document.getElementById(targetId);
+
+                    // Smooth scroll to work item
+                    targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+
+                    // Add glow class
+                    targetElement.classList.add("glow");
+
+                    // Remove glow after 2s
+                    setTimeout(() => {
+                        targetElement.classList.remove("glow");
+                    }, 2000);
+
+                    // Remove highlight from all work items
+                    document.querySelectorAll(".work.highlight").forEach((el) => {
+                        el.classList.remove("highlight");
+                    });
+
+                    // Add highlight to the clicked work item
+                    targetElement.classList.add("highlight");
+                });
+            });
+        }
+
+        async function updateWorkItems() {
+            const searchInput = document.getElementById('search');
+            const clearBtn = document.getElementById('clear-btn');
+            const workEntries = document.querySelectorAll('.work');
+            const noResultsMsg = document.getElementById('no-results');
+            const timelineItems = document.querySelectorAll(".timeline-link");
+            const tags = document.querySelectorAll(".tag");
+
+            // When clicking on RHS work items
+            workEntries.forEach((work) => {
+                work.addEventListener("click", () => {
+                    const company = work.dataset.company;
+                    highlightTimeline(company);
+                    // Remove highlight from all work items
+                    document.querySelectorAll(".work.highlight").forEach((el) => {
+                        el.classList.remove("highlight");
+                    });
+
+                    // Add highlight to the clicked work item
+                    work.classList.add("highlight");
+                });
+            });
+
+            tags.forEach(tag => {
+                tag.addEventListener("click", () => {
+                    const selectedTag = tag.textContent.trim();
+                    workEntries.forEach(work => {
+                        const workTags = work.dataset.tags.toLowerCase();
+                        if (workTags.includes(selectedTag.toLowerCase())) {
+                            work.classList.remove("hidden");
+                        } else {
+                            work.classList.add("hidden");
+                        }
+                    });
+                    document.getElementById("searchInput").value = selectedTag;
+                    clearButton.classList.remove("hidden");
+                });
+            });
+
+
+            // Utility function to highlight timeline nodes
+            function highlightTimeline(company) {
+                timelineItems.forEach((item) => {
+                    item.classList.toggle("active", item.dataset.company === company);
+                });
+            }
+
+            timelineItems.forEach((item) => {
+                item.addEventListener("click", () => {
+                    // Remove highlight from all timeline items
+                    document.querySelectorAll(".timeline-link").forEach((el) =>
+                        el.classList.remove("active")
+                    );
+
+                    // Add highlight to the clicked timeline item
+                    item.classList.add("active");
+                });
+            });
+        }
+
+        function filterWork() {
+            const query = document
+                .getElementById("searchInput")
+                .value.toLowerCase();
+            const works = document.querySelectorAll(".work");
+            let found = false;
+
+            works.forEach((work) => {
+                const text = work.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    work.classList.remove("hidden");
+                    found = true;
+                } else {
+                    work.classList.add("hidden");
+                }
+            });
+
+            document.getElementById("noResults").classList.toggle("hidden", found);
+            // updateActiveTimeline(); // Update scrollspy after filtering
+        }
+
+        function clearSearch() {
+            document.getElementById("searchInput").value = "";
+            filterWork();
+        }
+
+        loadWorkItems()
+            .then(() => updateWorkItems())
+            .then(() => updateTimeLinks())
+            .then(() => console.log("All done"))
+            .catch(err => console.error(err));
+
+    </script>
+</body>
+
+</html>
