@@ -128,14 +128,61 @@
     </footer>
 
     <script>
+        async function getSampleWorkData() {
+            return new Promise((resolve) => {
+                const data = [
+                    {
+                        "Id": "1",
+                        "Role": "Good-Guy",
+                        "Company": "Earth",
+                        "TimeLineDates": "2020-Present",
+                        "WorkItemDates": "Sep 2020 - Dec 2030",
+                        "Duration": "10 years 2 months",
+                        "Type": "Contract",
+                        "Description": "Did a lot of good work, seriously",
+                        "Tags": "Good-Guy, Funny"
+                    },
+                    {
+                        "Id": "2",
+                        "Role": "Really Good-Guy",
+                        "Company": "Earth",
+                        "TimeLineDates": "2010-2020",
+                        "WorkItemDates": "Sep 2010 - Sep 2020",
+                        "Duration": "10 years",
+                        "Type": "Contract",
+                        "Description": "Did a lot of good work, then some even more seriously good work",
+                        "Tags": "Good-Guy, Funny, Really-Good, Not-Evil"
+                    }
+                ];
+                resolve(data);
+            });
+        }
+
         async function loadWorkItems() {
-            const json = 'https://some-data-load';
-            
-            const response = await fetch(json);
+            // The format I used but you can have whatever you want and just tailor the display below:
+            // [
+            //   {
+            //     "Id": "...",
+            //     "Role": "...",
+            //     "Company": "...",
+            //     "TimeLineDates": "...",
+            //     "WorkItemDates": "...",
+            //     "Duration": "...",
+            //     "Type": "...",
+            //     "Description": "...",
+            //     "Tags": "...",
+            //   },...
+            //    ]
+
+            // uncomment these lines out to suck your data from some url
+            // const json = 'https://some-data-load';            
+            // const response = await fetch(json);
+            // const workItems = await response.json();
 
             document.getElementById('loading').style.display = 'none';
-
-            const workItems = await response.json();
+            
+            // comment out this line when you want to pull data from a real source and uncomment the ones above
+            const workItems = await getSampleWorkData();
 
             const timeline = document.getElementById('timeline');
             if (!timeline) {
@@ -170,6 +217,7 @@
                 div.dataset.tags = item.Tags;
                 div.className = "bg-white p-6 rounded-lg shadow work";
 
+                // what the work item will look like 
                 div.innerHTML = `
         <h3 class="text-xl font-bold mb-1">${item.Role}</h3>
         <p class="text-gray-500 mb-2">${item.Company} | ${item.WorkItemDates} | ${item.Type} | ${item.Duration}</p>
@@ -294,7 +342,6 @@
             });
 
             document.getElementById("noResults").classList.toggle("hidden", found);
-            // updateActiveTimeline(); // Update scrollspy after filtering
         }
 
         function clearSearch() {
